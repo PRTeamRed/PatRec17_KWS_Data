@@ -2,7 +2,6 @@
 # DTW
 # Written by C.B. Doorenbos (2018)
 
-
 def DTWDistance (feature_vector_1, feature_vector_2, distancemetric = 'euclidean'):
     """
     Computes dynamic time warping distance
@@ -15,62 +14,56 @@ def DTWDistance (feature_vector_1, feature_vector_2, distancemetric = 'euclidean
             Same options as scipy.spatial.distance.cdist():
             e.g. euclidean (default), cityblock, cosine...
 
-    returns: distance, moves
-        distance:
-            the computed DTW distance
-        moves:
-            a string with the moves walked by the algorithm:
-            0 means one step further in feature_vector_1,
-            2 means one step further in feature_vector_2,
-            1 means one step further in both feature vectors.
-
-
-    Implementation:
-        The function computes the DTW distance by a greedy search of the
-        distance matrix. It starts in the corner (0,0), then increases i, j or
-        both at each step, until it reaches the corner (N, M). At every step,
-        there are three possibilities, the algorithm picks the move which lands
-        on element wth the lowest value of the three in the distance matrix.
+    Returns the DTW distance
     """
     import scipy as sc;
     # Compute distance matrix for all sets of feature vectors
     import scipy.spatial.distance;
-    distance_matrix = scipy.spatial.distance.cdist(
-            feature_vector_1.transpose(),
-            feature_vector_2.transpose(),
-            distancemetric);
 
-    # Initialise variables
-    moves = "";
-    distance = i = j = 0;
+    ndim = feature_vector_1.shape[0];
+    if ndim != feature_vector_2.shape[0]:
+        raise ValueError("Feature vectors must have the same number of rows!");
 
-    # Traverse distance matrix
-    while (i < distance_matrix.shape[0] - 1) & (j < distance_matrix.shape[1] - 1):
-        possible_new_positions = sc.array([distance_matrix[i+1, j],
-                                           distance_matrix[i+1,j+1],
-                                           distance_matrix[i, j+1]])
-        move = sc.argmin(possible_new_positions);
-        distance += possible_new_positions[move];
-        if move == 0:
-            i += 1;
-            moves += "0"
-        elif move == 2:
-            j += 1;
-            moves += "2"
+    N1 = feature_vector_1.shape[1];
+    N2 = feature_vector_2.shape[1];
+    bandwidth = int(N1/5+1);
+
+    distance_matrix = sc.zeros([N1,N2]);
+    for j in range(N2):
+        imin = max(0,  j - bandwidth);
+        imax = min(N2, j + bandwidth + 1);
+
+        distance_matrix[imin : imax, j] = sc.spatial.distance.cdist(feature_vector_1[:,imin:imax].transpose(), feature_vector_2[:,j].transpose().reshape([1,ndim])).flatten();
+
+        if j == 0:
+            for i in range(imin+1, imax):
+                distance_matrix[i, j] += distance_matrix[i-1, j];
+            imax_previous = imax;
         else:
-            i += 1;
-            j += 1;
-            moves += "1"
+            if imin == 0:
+                distance_matrix[imin, j] += min([distance_matrix[imin-1, j-1],
+                                                 distance_matrix[imin,   j-1]]);
+            else:
+                distance_matrix[imin, j] += min([distance_matrix[imin-1, j],
+                                                 distance_matrix[imin-1, j-1],
+                                                 distance_matrix[imin,   j-1]]);
 
-    # When reaching one side of the matrix, finish by moving completely to the corner
-    if (i == distance_matrix.shape[0] - 1):
-        moves += (distance_matrix.shape[1] - 1 - j) * "2";
-        distance += distance_matrix[i, j:].sum();
-    elif (j == distance_matrix.shape[1] - 1):
-        moves += (distance_matrix.shape[0] - 1 - i) * "0";
-        distance += distance_matrix[i:, j].sum();
+            for i in range(imin+1, imax_previous):
+                distance_matrix[i, j] += min([distance_matrix[i-1, j],
+                                              distance_matrix[i-1, j-1],
+                                              distance_matrix[i,   j-1]]);
+            if imax > imax_previous:
+                distance_matrix[imax_previous, j ] += \
+                        min([distance_matrix[imax_previous-1, j],
+                             distance_matrix[imax_previous-1, j-1]]);
 
-    # Return distance and moves string
-    return distance, moves;
+                for i in range(imax_previous+1, imax):
+                    distance_matrix[i, j] += distance_matrix[i-1, j];
+
+    return distance_matrix[-1, -1];
 
 
+import scipy as sc
+x = sc.array([[ 0.07160992,  0.8498653 ,  0.8971797 ,  0.66737027,  0.19582528]])
+y = sc.array([[ 0.85100001,  0.44794892,  0.42879467,  0.60230897,  0.01965607]])
+print (DTWDistance(x,y));
