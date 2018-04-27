@@ -27,7 +27,8 @@ def main():
 
     # binarize()
 
-    cropImages()
+    # gets list of words for each image (each word is a numpy array)
+    words = cropImages()
 
 
 def binarize():
@@ -44,15 +45,19 @@ def getImageNames():
 
 def cropImages():
     print("Cropping images...")
+    words = []
     for img in getImageNames():
         createDir(cropPath + img.replace(".jpg", ""))
-        cropImage(img.replace(".jpg", ""))
+        words.append(cropImage(img.replace(".jpg", "")))
+    return words
 
 
 def cropImage(imgNumber):
     polygons = getPolygonsFromSVGPaths(imgNumber)
+    words = []
     for i in range(len(polygons)):
-        cropWord(polygons[i], imgNumber, i)
+        words.append(cropWord(polygons[i], imgNumber, i))
+    return words
 
 
 def getPolygonsFromSVGPaths(imgNumber):
@@ -100,6 +105,7 @@ def cropWord(polygon, imgNumber, croppedImgNumber):
 
     newIm.save(cropPath + str(imgNumber) + "/crop_" + str(croppedImgNumber) + ".png")
 
+    return newImArray;
 
 if __name__ == "__main__":
     main()
