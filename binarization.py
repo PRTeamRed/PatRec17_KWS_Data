@@ -1,6 +1,8 @@
 """
 Using DIVAServices and the there provided Otsu binarization to binarize the images.
 """
+import pickle
+from pathlib import Path
 
 from divaServices import ExecuteOnDivaServices
 from os import listdir, makedirs
@@ -45,10 +47,15 @@ def getImageNames():
 
 def cropImages():
     print("Cropping images...")
+    serialized_name = cropPath + "serializedWords"
+    if Path(serialized_name).is_file():
+        return pickle.load(serialized_name)
+
     words = []
     for img in getImageNames():
         createDir(cropPath + img.replace(".jpg", ""))
         words.append(cropImage(img.replace(".jpg", "")))
+    pickle.dump(words, serialized_name)
     return words
 
 
@@ -82,7 +89,7 @@ def cropWord(polygon, imgNumber, croppedImgNumber):
     im = Image.open("images/" + imgNumber + ".jpg").convert("RGBA")
 
     # convert to numpy (for convenience)
-    imArray = numpy.asarray(im)
+    imArray = numpy.asarray(im) / 255
 
     # create mask
     maskIm = Image.new('L', (imArray.shape[1], imArray.shape[0]), 0)
@@ -101,11 +108,12 @@ def cropWord(polygon, imgNumber, croppedImgNumber):
     # TODO cropped image file same size as input image
 
     # back to Image from numpy
-    newIm = Image.fromarray(newImArray, "RGBA")
+    #newIm = Image.fromarray(newImArray, "RGBA")
 
-    newIm.save(cropPath + str(imgNumber) + "/crop_" + str(croppedImgNumber) + ".png")
+    #newIm.save(cropPath + str(imgNumber) + "/crop_" + str(croppedImgNumber) + ".png")
 
-    return newImArray;
+    return newImArray
+
 
 if __name__ == "__main__":
     main()

@@ -72,3 +72,9 @@ def CreateFeatures(img):
     f5 = FractionBlack(img) #fraction of ink in each column
     feature_vectors = np.stack((f1, f2, f3, f4, f5))
     return feature_vectors
+
+def CreateAllFeatures(imgs):
+    features = []
+    for img in imgs:
+        features.append(CreateFeatures(img))
+    return features

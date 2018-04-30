@@ -43,6 +43,6 @@ def fNormNonLinear(m,r=0.5):
 if __name__ == "__main__":
     
     l_m = np.array([[999,3456,45555,3],[1.5,1.5,1.5,1.5],[30000,4000,45555,3],[-2345,49,-456,3],[1.5999,2.345,1.5,1.5]])
-	print(fNormNonLinear(l_m))
+    print(fNormNonLinear(l_m))
     print(fNormLinear(l_m))
     
