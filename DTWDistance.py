@@ -61,9 +61,3 @@ def DTWDistance (feature_vector_1, feature_vector_2, distancemetric = 'euclidean
                     distance_matrix[i, j] += distance_matrix[i-1, j];
 
     return distance_matrix[-1, -1];
-
-
-import scipy as sc
-x = sc.array([[ 0.07160992,  0.8498653 ,  0.8971797 ,  0.66737027,  0.19582528]])
-y = sc.array([[ 0.85100001,  0.44794892,  0.42879467,  0.60230897,  0.01965607]])
-print (DTWDistance(x,y));
