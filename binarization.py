@@ -16,6 +16,7 @@ binUrl = "http://divaservices.unifr.ch/api/v2/binarization/otsubinarization/1"
 binPath = imgPath + "bin/"
 cropPath = imgPath + "crop/"
 svgPath = "ground-truth/locations/"
+serialized_name = cropPath + "serializedWords"
 
 
 def createDir(directory):
@@ -47,15 +48,17 @@ def getImageNames():
 
 def cropImages():
     print("Cropping images...")
-    serialized_name = cropPath + "serializedWords"
     if Path(serialized_name).is_file():
-        return pickle.load(serialized_name)
+        return pickle.load(open(serialized_name, "rb"))
 
     words = []
+    count = 0
     for img in getImageNames():
-        createDir(cropPath + img.replace(".jpg", ""))
-        words.append(cropImage(img.replace(".jpg", "")))
-    pickle.dump(words, serialized_name)
+        if count < 2:
+            createDir(cropPath + img.replace(".jpg", ""))
+            words.append(cropImage(img.replace(".jpg", "")))
+        count += 1
+    pickle.dump(words, open(serialized_name, "wb"))
     return words
 
 
@@ -108,9 +111,9 @@ def cropWord(polygon, imgNumber, croppedImgNumber):
     # TODO cropped image file same size as input image
 
     # back to Image from numpy
-    #newIm = Image.fromarray(newImArray, "RGBA")
+    newIm = Image.fromarray(newImArray, "RGBA")
 
-    #newIm.save(cropPath + str(imgNumber) + "/crop_" + str(croppedImgNumber) + ".png")
+    newIm.save(cropPath + str(imgNumber) + "/crop_" + str(croppedImgNumber) + ".png")
 
     return newImArray
 
