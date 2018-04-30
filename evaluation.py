@@ -59,8 +59,8 @@ def main():
 	
 	"""
 	*********** TODO **************
-	labels_test = 
-	n_labels = 
+	labels_test = labels of the testing set
+	n_labels = number of possible labels
 	"""
 	precision, recall, average_precision = compute_average_precision_score(n_labels, labels_test, labels_score)
 	# Plot precision-recall curve
